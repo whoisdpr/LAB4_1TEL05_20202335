@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Colores principales -->
+    <color name="primary_color">#1976D2</color>
+    <color name="primary_dark">#0D47A1</color>
+    <color name="accent_color">#FF6F00</color>
+
+    <!-- Colores de fondo -->
+    <color name="background_color">#F5F7FA</color>
+    <color name="card_header_color">#1976D2</color>
+
+    <!-- Colores de texto -->
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+
+    <!-- Colores de estado -->
+    <color name="success_color">#4CAF50</color>
+    <color name="warning_color">#FF9800</color>
+    <color name="error_color">#F44336</color>
+
+    <!-- Colores de importancia (chips) -->
+    <color name="chip_alta">#F44336</color>
+    <color name="chip_media">#FF9800</color>
+    <color name="chip_baja">#4CAF50</color>
+</resources>

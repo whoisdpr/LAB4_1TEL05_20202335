@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Lab5_20202335</string>
+    <string-array name="periodicidad_array">
+        <item>una vez</item>
+        <item>mensual</item>
+        <item>bimestral</item>
+        <item>trimestral</item>
+        <item>anual</item>
+    </string-array>
+    <string-array name="importancia_array">
+        <item>baja</item>
+        <item>media</item>
+        <item>alta</item>
+    </string-array>
+</resources>
