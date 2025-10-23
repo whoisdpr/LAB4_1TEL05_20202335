@@ -2,30 +2,31 @@ package com.example.lab5_20202335.activities;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.Menu;             
+import android.view.MenuItem;        
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+
 import com.example.lab5_20202335.R;
 import com.example.lab5_20202335.adapters.ServicioAdapter;
+import com.example.lab5_20202335.models.PagoHistorial;
 import com.example.lab5_20202335.models.Servicio;
-import com.example.lab5_20202335.utils.StorageManager;
 import com.example.lab5_20202335.utils.NotificationHelper;
 import com.example.lab5_20202335.utils.NotificationScheduler;
-import com.example.lab5_20202335.models.PagoHistorial;
+import com.example.lab5_20202335.utils.StorageManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements ServicioAdapter.OnServicioClickListener {
 
@@ -34,88 +35,91 @@ public class MainActivity extends AppCompatActivity implements ServicioAdapter.O
     private RecyclerView recyclerView;
     private ServicioAdapter adapter;
     private ArrayList<Servicio> listaServicios;
-    private TextView textViewSinServicios;
+    private TextView textViewSinServicios, textViewTotalServicios, textViewProximoPago;
     private FloatingActionButton fabAgregar;
-
-        // Configurar toolbar
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // 🔹 Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // 🔹 Crear canales de notificación
         NotificationHelper.createNotificationChannels(this);
 
+        // 🔹 Permiso para notificaciones (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        layoutSinServicios = findViewById(R.id.layoutSinServicios);
-        textViewTotalServicios = findViewById(R.id.textViewTotalServicios);
-        textViewProximoPago = findViewById(R.id.textViewProximoPago);
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_CODE_NOTIF);
-
-            }
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    REQ_CODE_NOTIF);
         }
+
+        // 🔹 Inicializar vistas
         recyclerView = findViewById(R.id.recyclerViewServicios);
         textViewSinServicios = findViewById(R.id.textViewSinServicios);
+        textViewTotalServicios = findViewById(R.id.textViewTotalServicios);
+        textViewProximoPago = findViewById(R.id.textViewProximoPago);
         fabAgregar = findViewById(R.id.fabAgregar);
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        fabAgregar.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, FormActivity.class)));
+
+        fabAgregar.setOnClickListener(v ->
+                startActivity(new Intent(MainActivity.this, FormActivity.class))
+        );
+
+        // 🔹 Cargar servicios guardados
+        cargarDatos();
+
+        // 🔹 Actualizar estadísticas
+        actualizarEstadisticas();
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_CODE_NOTIF) {
-            // no-op: el usuario aceptó o rechazó; el comportamiento de notificaciones seguirá según permiso
-        }
-    }
-
-        // Actualizar estadísticas
-        textViewTotalServicios.setText(String.valueOf(listaServicios.size()));
-
-        // Calcular días hasta el próximo pago
-        if (!listaServicios.isEmpty()) {
-            long ahora = System.currentTimeMillis();
-            long proximoVencimiento = Long.MAX_VALUE;
-
-            for (Servicio servicio : listaServicios) {
-                if (servicio.getFechaVencimiento() > ahora && servicio.getFechaVencimiento() < proximoVencimiento) {
-                    proximoVencimiento = servicio.getFechaVencimiento();
-                }
-            }
-
-            if (proximoVencimiento != Long.MAX_VALUE) {
-                long diff = proximoVencimiento - ahora;
-                long dias = TimeUnit.MILLISECONDS.toDays(diff);
-                textViewProximoPago.setText(String.valueOf(dias));
-            } else {
-                textViewProximoPago.setText("--");
-            }
-        } else {
-            textViewProximoPago.setText("--");
-        }
-
-        // Mostrar/ocultar elementos según si hay servicios
-
-            layoutSinServicios.setVisibility(View.VISIBLE);
     protected void onResume() {
         super.onResume();
-            layoutSinServicios.setVisibility(View.GONE);
+        cargarDatos();
+        actualizarEstadisticas();
     }
-
 
     private void cargarDatos() {
         listaServicios = StorageManager.cargarServicios(this);
+        if (listaServicios == null) listaServicios = new ArrayList<>();
+
         if (listaServicios.isEmpty()) {
-            textViewSinServicios.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.GONE);
+            textViewSinServicios.setVisibility(android.view.View.VISIBLE);
+            recyclerView.setVisibility(android.view.View.GONE);
         } else {
-            textViewSinServicios.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+            textViewSinServicios.setVisibility(android.view.View.GONE);
+            recyclerView.setVisibility(android.view.View.VISIBLE);
         }
+
         adapter = new ServicioAdapter(this, listaServicios, this);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void actualizarEstadisticas() {
+        textViewTotalServicios.setText(String.valueOf(listaServicios.size()));
+
+        long ahora = System.currentTimeMillis();
+        long proximoVencimiento = Long.MAX_VALUE;
+
+        for (Servicio servicio : listaServicios) {
+            if (servicio.getFechaVencimiento() > ahora &&
+                    servicio.getFechaVencimiento() < proximoVencimiento) {
+                proximoVencimiento = servicio.getFechaVencimiento();
+            }
+        }
+
+        if (proximoVencimiento != Long.MAX_VALUE) {
+            long diff = proximoVencimiento - ahora;
+            long dias = TimeUnit.MILLISECONDS.toDays(diff);
+            textViewProximoPago.setText(String.valueOf(dias));
+        } else {
+            textViewProximoPago.setText("--");
+        }
     }
 
     @Override
@@ -131,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements ServicioAdapter.O
         listaServicios.remove(servicio);
         StorageManager.guardarServicios(this, listaServicios);
         cargarDatos();
+        actualizarEstadisticas();
     }
 
     @Override
@@ -145,33 +150,30 @@ public class MainActivity extends AppCompatActivity implements ServicioAdapter.O
         ArrayList<PagoHistorial> historial = StorageManager.cargarHistorial(this);
         historial.add(itemHistorial);
         StorageManager.guardarHistorial(this, historial);
+
         NotificationScheduler.cancelarNotificacion(this, servicio);
+
         if ("una vez".equals(servicio.getPeriodicidad())) {
             listaServicios.remove(servicio);
         } else {
             Calendar c = Calendar.getInstance();
             c.setTimeInMillis(servicio.getFechaVencimiento());
             switch (servicio.getPeriodicidad()) {
-                case "mensual":
-                    c.add(Calendar.MONTH, 1);
-                    break;
-                case "bimestral":
-                    c.add(Calendar.MONTH, 2);
-                    break;
-                case "trimestral":
-                    c.add(Calendar.MONTH, 3);
-                    break;
-                case "anual":
-                    c.add(Calendar.YEAR, 1);
-                    break;
+                case "mensual": c.add(Calendar.MONTH, 1); break;
+                case "bimestral": c.add(Calendar.MONTH, 2); break;
+                case "trimestral": c.add(Calendar.MONTH, 3); break;
+                case "anual": c.add(Calendar.YEAR, 1); break;
             }
             servicio.setFechaVencimiento(c.getTimeInMillis());
             NotificationScheduler.programarNotificacion(this, servicio);
         }
+
         StorageManager.guardarServicios(this, listaServicios);
         cargarDatos();
-        // Toast moved to UI feedback
+        actualizarEstadisticas();
     }
+
+    // 🔹 Menú principal
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);

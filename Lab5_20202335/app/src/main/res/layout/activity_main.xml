@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,6 +8,7 @@
     android:background="@color/background_color"
     tools:context=".activities.MainActivity">
 
+    <!-- 🔹 AppBar con Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -21,11 +23,11 @@
             android:elevation="4dp"
             app:title="💰 Mis Pagos"
             app:titleTextColor="@android:color/white"
-            app:menu="@menu/main_menu"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- 🔹 Contenido principal scrollable -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -37,7 +39,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Header Card con estadísticas -->
+            <!-- 📊 Tarjeta de resumen de servicios -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -67,6 +69,7 @@
                         android:orientation="horizontal"
                         android:weightSum="2">
 
+                        <!-- Total de servicios -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -94,6 +97,7 @@
 
                         </LinearLayout>
 
+                        <!-- Próximo pago -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -125,10 +129,9 @@
                     </LinearLayout>
 
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- RecyclerView con servicios -->
+            <!-- 📋 Título lista -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -139,6 +142,7 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginStart="4dp" />
 
+            <!-- 📜 Lista de servicios -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewServicios"
                 android:layout_width="match_parent"
@@ -146,7 +150,7 @@
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_servicio" />
 
-            <!-- Mensaje cuando no hay servicios -->
+            <!-- 📭 Layout cuando no hay servicios -->
             <LinearLayout
                 android:id="@+id/layoutSinServicios"
                 android:layout_width="match_parent"
@@ -180,27 +184,23 @@
                     android:textSize="14sp"
                     android:textColor="@color/secondary_text"
                     android:gravity="center" />
-
             </LinearLayout>
 
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 
+    <!-- ➕ Botón flotante agregar servicio -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAgregar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        android:clickable="true"
-        android:focusable="true"
         android:contentDescription="Agregar nuevo servicio"
         android:src="@android:drawable/ic_input_add"
         app:tint="@android:color/white"
         app:backgroundTint="@color/accent_color"
         app:elevation="6dp"
-        app:layout_anchor="@id/appBarLayout"
-        app:layout_anchorGravity="bottom|end"
         android:layout_gravity="bottom|end" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
